@@ -8,9 +8,8 @@
 // author		志賀龍之介
 // -!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!- //
 
-// マクロの定義 =============================================================
-#ifndef PLAYER
-#define PLAYER
+// 多重インクルードの防止 ===================================================
+#pragma once
 
 // ヘッダファイルの読み込み =================================================
 #include <memory>
@@ -19,9 +18,12 @@
 #include "SimpleMath.h"
 #include "Effects.h"
 #include "Keyboard.h"
-#include "DebugCamera.h"
-#include "FollowCamera.h"
 #include "CommonStates.h"
+
+// クラスの前方宣言 =========================================================
+class DebugCamera;
+class FollowCamera;
+class TiledMap;
 
 // <プレイヤークラス> ------------------------------------------------------
 class Player
@@ -37,16 +39,16 @@ class Player
 		DirectX::Keyboard::KeyboardStateTracker m_key_tracker;
 
 		// プレイヤーモデル
-		std::unique_ptr<DirectX::Model>		m_player_model;
+		std::unique_ptr<DirectX::Model>			m_player_model;
 
 		// マトリックス
-		DirectX::SimpleMath::Matrix			m_player_matrix;
+		DirectX::SimpleMath::Matrix				m_player_matrix;
 
 		// プレイヤーpos
-		DirectX::SimpleMath::Vector3		m_player_pos;
+		DirectX::SimpleMath::Vector3			m_player_pos;
 
 		// プレイヤーvel
-		DirectX::SimpleMath::Vector3		m_player_vel;
+		DirectX::SimpleMath::Vector3			m_player_vel;
 
 	// メンバ関数の宣言
 	public:
@@ -68,4 +70,3 @@ class Player
 			return m_player_pos;
 		}
 };
-#endif	// PLAYER

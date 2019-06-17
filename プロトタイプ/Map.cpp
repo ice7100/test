@@ -11,6 +11,9 @@
 // ヘッダファイルの読み込み =================================================
 #include "pch.h"
 #include "Map.h"
+#include "DebugCamera.h"
+#include "FollowCamera.h"
+#include "TiledMap.h"
 
 // 名前空間の定義 ===========================================================
 using namespace DirectX;
@@ -80,8 +83,8 @@ void Map::Render(DebugCamera* camera, DirectX::SimpleMath::Matrix projection)
 			int tileId = m_tiledmap->GetNumber(i, j);
 			ID3D11ShaderResourceView* shaderResourceView = m_texture[tileId].Get();
 
-			float x = j * SIZE - 12.f;
-			float z = i * SIZE - 12.f;
+			float x = j * SIZE - 60.f;
+			float z = i * SIZE - 60.f;
 
 			DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::Identity;
 			world *= DirectX::SimpleMath::Matrix::CreateTranslation(x, 4.f, z);
@@ -115,8 +118,8 @@ void Map::Render(FollowCamera* camera, DirectX::SimpleMath::Matrix projection)
 			int tileId = m_tiledmap->GetNumber(i, j);
 			ID3D11ShaderResourceView* shaderResourceView = m_texture[tileId].Get();
 
-			float x = j * SIZE - 12.f;
-			float z = i * SIZE - 12.f;
+			float x = j * SIZE - 60.f;
+			float z = i * SIZE - 60.f;
 
 			DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::Identity;
 			world *= DirectX::SimpleMath::Matrix::CreateTranslation(x, 4.f, z);
@@ -139,7 +142,8 @@ void Map::Render(FollowCamera* camera, DirectX::SimpleMath::Matrix projection)
 //
 // return		通れるならtrueを返す
 // -------------------------------------------------------------------------
-//bool Map::IsPassable(float grid_x, float grid_z)
+//bool Map::IsPassable(float grid_x, float grid_z) const
 //{
+//
 //	return false;
 //}

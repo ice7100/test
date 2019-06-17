@@ -11,6 +11,8 @@
 // ヘッダファイルの読み込み =================================================
 #include "pch.h"
 #include "Player.h"
+#include "DebugCamera.h"
+#include "FollowCamera.h"
 
 // 名前空間の定義 ===========================================================
 using namespace DirectX;

@@ -17,9 +17,10 @@
 #include "GeometricPrimitive.h"
 #include <WICTextureLoader.h>
 
-#include "DebugCamera.h"
-#include "FollowCamera.h"
-#include "TiledMap.h"
+// クラスの前方宣言 =========================================================
+class DebugCamera;
+class FollowCamera;
+class TiledMap;
 
 // <マップクラス> ----------------------------------------------------------
 class Map
@@ -49,6 +50,5 @@ class Map
 		void Render(DebugCamera* camera, DirectX::SimpleMath::Matrix projection);
 		void Render(FollowCamera* camera, DirectX::SimpleMath::Matrix projection);
 
-//		bool IsPassable(float grid_x, float grid_z);
+//		bool IsPassable(float grid_x, float grid_z) const;
 };
-

@@ -55,4 +55,3 @@ class TiledMap
 			return m_mapdata[_row][_column];
 		}
 };
-

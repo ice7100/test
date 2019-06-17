@@ -1,80 +1,88 @@
+// -!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!- //
+// file			Game.cpp
 //
-// Game.cpp
+// overview		がめソース
 //
+// date			2019/06/17
+//
+// author		志賀龍之介
+// -!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!- //
 
+// ヘッダファイルの読み込み =================================================
 #include "pch.h"
 #include "Game.h"
 
 #include "DebugCamera.h"
-//#include "FollowCamera.h"
+#include "FollowCamera.h"
 #include "GridFloor.h"
 #include "Map.h"
+#include "Player.h"
 
 extern void ExitGame();
 
+// 名前空間の定義 ===========================================================
 using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
+// クラス定数の定義 =========================================================
 const DirectX::SimpleMath::Vector3 Game::TARGET_TO_EYE_VEC(0.0f, 20.0f, 20.0f);
 
-//const float Game::PLAYER_VEL = 0.3f;
-
 Game::Game() noexcept(false)
-	: //m_debug_camera(nullptr)
-	  m_follow_camera(nullptr)
+	: m_debug_camera(nullptr)
+	  //m_follow_camera(nullptr)
 	, m_grid_floor(nullptr)
 {
-	m_deviceResources = std::make_unique<DX::DeviceResources>();
-	m_deviceResources->RegisterDeviceNotify(this);
+	m_device_resources = std::make_unique<DX::DeviceResources>();
+	m_device_resources->RegisterDeviceNotify(this);
 }
 
 Game::~Game()
 {
-//	if (m_debug_camera != nullptr)
-//	{
-//		delete m_debug_camera;
-//		m_debug_camera = nullptr;
-//	}
-	if (m_follow_camera != nullptr)
+	if (m_debug_camera != nullptr)
 	{
-		delete m_follow_camera;
-		m_follow_camera = nullptr;
+		delete m_debug_camera;
+		m_debug_camera = nullptr;
 	}
+//	if (m_follow_camera != nullptr)
+//	{
+//		delete m_follow_camera;
+//		m_follow_camera = nullptr;
+//	}
 }
 
 // Initialize the Direct3D resources required to run.
 void Game::Initialize(HWND window, int width, int height)
 {
 	// マウスの作成
-	m_pMouse = std::make_unique<Mouse>();
-	m_pMouse->SetWindow(window);
+	m_mouse = std::make_unique<Mouse>();
+	m_mouse->SetWindow(window);
 
 	// キーボードの作成
-	m_pKeyboard = std::make_unique<Keyboard>();
+	m_keyboard = std::make_unique<Keyboard>();
 
 	// デバッグカメラの作成
-//	m_debug_camera = new DebugCamera();
+	m_debug_camera = new DebugCamera();
 
 	// フォローカメラの作成
-	m_follow_camera = new FollowCamera();
+//	m_follow_camera = new FollowCamera();
 
-	m_deviceResources->SetWindow(window, width, height);
+	m_device_resources->SetWindow(window, width, height);
 
-	m_deviceResources->CreateDeviceResources();
+	m_device_resources->CreateDeviceResources();
 	CreateDeviceDependentResources();
 
-	m_deviceResources->CreateWindowSizeDependentResources();
+	m_device_resources->CreateWindowSizeDependentResources();
 	CreateWindowSizeDependentResources();
 
 	// コモンステートの作成
-	m_pState = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
+	m_state = std::make_unique<CommonStates>(m_device_resources->GetD3DDevice());
 
 	// グリッド床の作成
-	m_grid_floor = std::make_unique<GridFloor>(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext(), m_pState.get(), 10.0f, 10);
+	m_grid_floor = std::make_unique<GridFloor>(m_device_resources->GetD3DDevice(), m_device_resources->GetD3DDeviceContext(), m_state.get(), 10.0f, 10);
 
 	// エフェクトファクトリの作成
-	EffectFactory* factory = new EffectFactory(m_deviceResources->GetD3DDevice());
+	EffectFactory* factory = new EffectFactory(m_device_resources->GetD3DDevice());
 
 	// プレイヤーの作成
 	m_player = std::make_unique<Player>();
@@ -88,13 +96,13 @@ void Game::Initialize(HWND window, int width, int height)
 	factory->SetDirectory(L"Resources/Models");
 
 	// ファイルを指定してモデルデータを読み込む
-	m_Floormodel = DirectX::Model::CreateFromCMO(
-		m_deviceResources->GetD3DDevice(),
+	m_floormodel = DirectX::Model::CreateFromCMO(
+		m_device_resources->GetD3DDevice(),
 		L"Resources/Models/floor.cmo",
 		*factory
 	);
 
-	m_player->Initialize(m_deviceResources->GetD3DDevice(), factory);
+	m_player->Initialize(m_device_resources->GetD3DDevice(), factory);
 
 	delete factory;
 
@@ -102,9 +110,9 @@ void Game::Initialize(HWND window, int width, int height)
 	DirectX::SimpleMath::Vector3 target(0.0f, 0.0f, 0.0f);
 	DirectX::SimpleMath::Vector3 up(0.0f, 1.0f, 0.0f);
 
-	m_follow_camera->Initialize(eye, target, up);
+//	m_follow_camera->Initialize(eye, target, up);
 
-	m_map->Initialize(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
+	m_map->Initialize(m_device_resources->GetD3DDevice(), m_device_resources->GetD3DDeviceContext());
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -137,11 +145,11 @@ void Game::Update(DX::StepTimer const& timer)
 	// プレイヤーの更新
 	m_player->Update();
 
-	m_follow_camera->setRefTargetPosition(m_player->GetPlayerPos());
-	m_follow_camera->setRefEyePosition(m_player->GetPlayerPos() + Game::TARGET_TO_EYE_VEC);
+//	m_follow_camera->setRefTargetPosition(m_player->GetPlayerPos());
+//	m_follow_camera->setRefEyePosition(m_player->GetPlayerPos() + Game::TARGET_TO_EYE_VEC);
 
-//	m_debug_camera->update();
-	m_follow_camera->Update();
+	m_debug_camera->update();
+//	m_follow_camera->Update();
 
 }
 #pragma endregion
@@ -158,8 +166,8 @@ void Game::Render()
 
 	Clear();
 
-	m_deviceResources->PIXBeginEvent(L"Render");
-	auto context = m_deviceResources->GetD3DDeviceContext();
+	m_device_resources->PIXBeginEvent(L"Render");
+	auto context = m_device_resources->GetD3DDeviceContext();
 
 	// TODO: Add your rendering code here.
 	context;
@@ -167,44 +175,44 @@ void Game::Render()
 	DirectX::SimpleMath::Matrix world;
 
 	// モデルの描画
-//	m_Floormodel->Draw(context, *m_pState.get(), world, m_debug_camera->getViewMatrix(), m_projection);	// 床
-	m_Floormodel->Draw(context, *m_pState.get(), world, m_follow_camera->getViewMatrix(), m_projection);	// 床
+	m_floormodel->Draw(context, *m_state.get(), world, m_debug_camera->getViewMatrix(), m_projection);
+//	m_floormodel->Draw(context, *m_state.get(), world, m_follow_camera->getViewMatrix(), m_projection);
 
-//	m_player->Render(context, *m_pState.get(), m_debug_camera, m_projection);
-	m_player->Render(context, *m_pState.get(), m_follow_camera, m_projection);
+	m_player->Render(context, *m_state.get(), m_debug_camera, m_projection);
+//	m_player->Render(context, *m_state.get(), m_follow_camera, m_projection);
 
-//	m_map->Render(m_debug_camera, m_projection);
-	m_map->Render(m_follow_camera, m_projection);
+	m_map->Render(m_debug_camera, m_projection);
+//	m_map->Render(m_follow_camera, m_projection);
 
 	// グリッド床の描画
-//	m_grid_floor->draw(context, m_debug_camera->getViewMatrix(), m_projection);
-	m_grid_floor->draw(context, m_follow_camera->getViewMatrix(), m_projection);
+	m_grid_floor->draw(context, m_debug_camera->getViewMatrix(), m_projection);
+//	m_grid_floor->draw(context, m_follow_camera->getViewMatrix(), m_projection);
 
-	m_deviceResources->PIXEndEvent();
+	m_device_resources->PIXEndEvent();
 
 	// Show the new frame.
-	m_deviceResources->Present();
+	m_device_resources->Present();
 }
 
 // Helper method to clear the back buffers.
 void Game::Clear()
 {
-	m_deviceResources->PIXBeginEvent(L"Clear");
+	m_device_resources->PIXBeginEvent(L"Clear");
 
 	// Clear the views.
-	auto context = m_deviceResources->GetD3DDeviceContext();
-	auto renderTarget = m_deviceResources->GetRenderTargetView();
-	auto depthStencil = m_deviceResources->GetDepthStencilView();
+	auto context = m_device_resources->GetD3DDeviceContext();
+	auto renderTarget = m_device_resources->GetRenderTargetView();
+	auto depthStencil = m_device_resources->GetDepthStencilView();
 
 	context->ClearRenderTargetView(renderTarget, Colors::CornflowerBlue);
 	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 
 	// Set the viewport.
-	auto viewport = m_deviceResources->GetScreenViewport();
+	auto viewport = m_device_resources->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
 
-	m_deviceResources->PIXEndEvent();
+	m_device_resources->PIXEndEvent();
 }
 #pragma endregion
 
@@ -234,13 +242,13 @@ void Game::OnResuming()
 
 void Game::OnWindowMoved()
 {
-	auto r = m_deviceResources->GetOutputSize();
-	m_deviceResources->WindowSizeChanged(r.right, r.bottom);
+	auto r = m_device_resources->GetOutputSize();
+	m_device_resources->WindowSizeChanged(r.right, r.bottom);
 }
 
 void Game::OnWindowSizeChanged(int width, int height)
 {
-	if (!m_deviceResources->WindowSizeChanged(width, height))
+	if (!m_device_resources->WindowSizeChanged(width, height))
 		return;
 
 	CreateWindowSizeDependentResources();
@@ -261,7 +269,7 @@ void Game::GetDefaultSize(int& width, int& height) const
 // These are the resources that depend on the device.
 void Game::CreateDeviceDependentResources()
 {
-	auto device = m_deviceResources->GetD3DDevice();
+	auto device = m_device_resources->GetD3DDevice();
 
 	// TODO: Initialize device dependent objects here (independent of window size).
 	device;
@@ -273,7 +281,7 @@ void Game::CreateWindowSizeDependentResources()
 	// TODO: Initialize windows-size dependent objects here.
 
 	// ウインドウサイズからアスペクト比を算出する
-	RECT size = m_deviceResources->GetOutputSize();
+	RECT size = m_device_resources->GetOutputSize();
 	float aspectRatio = float(size.right) / float(size.bottom);
 
 	// 画角を設定
@@ -291,15 +299,15 @@ void Game::CreateWindowSizeDependentResources()
 
 void Game::setState()
 {
-	auto context = m_deviceResources->GetD3DDeviceContext();
+	auto context = m_device_resources->GetD3DDeviceContext();
 	// カリングしない 
-	context->OMSetBlendState(m_pState->AlphaBlend(), Colors::Black, 0xFFFFFFFF);
+	context->OMSetBlendState(m_state->AlphaBlend(), Colors::Black, 0xFFFFFFFF);
 }
 
 void Game::OnDeviceLost()
 {
 	// TODO: Add Direct3D resource cleanup here.
-	m_Floormodel.reset();
+	m_floormodel.reset();
 
 	m_player->Finalize();
 }
