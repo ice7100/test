@@ -20,6 +20,7 @@ using namespace DirectX::SimpleMath;
 
 // クラス定数の定義 =========================================================
 const float Player::PLAYER_VEL = 0.3f;
+const float Player::RADIUS = 0.98f;
 
 // メンバ関数の定義 =========================================================
 // -------------------------------------------------------------------------
@@ -61,8 +62,10 @@ void Player::Initialize(ID3D11Device1* device, EffectFactory* factory)
 	m_player_pos = Vector3();
 
 	// プレイヤーvelの初期化
-	m_player_vel = Vector3();
+	m_player_vel = Vector3(PLAYER_VEL, 0.0f, PLAYER_VEL);
 
+	m_player_box.center = m_player_pos;
+	m_player_box.radius = DirectX::SimpleMath::Vector3(RADIUS, RADIUS, RADIUS);
 }
 
 // -------------------------------------------------------------------------
@@ -79,25 +82,24 @@ void Player::Update()
 
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_LEFT)))
 	{
-		m_player_vel.x -= PLAYER_VEL;
+		m_player_pos.x = m_player_pos.x - m_player_vel.x;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_RIGHT)))
 	{
-		m_player_vel.x += PLAYER_VEL;
+		m_player_pos.x = m_player_pos.x + m_player_vel.x;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_UP)))
 	{
-		m_player_vel.z -= PLAYER_VEL;
+		m_player_pos.z = m_player_pos.z - m_player_vel.z;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_DOWN)))
 	{
-		m_player_vel.z += PLAYER_VEL;
+		m_player_pos.z = m_player_pos.z + m_player_vel.z;
 	}
-	
-	m_player_pos = m_player_vel;
 
 	m_player_matrix = DirectX::SimpleMath::Matrix::CreateTranslation(m_player_pos);
 
+	m_player_box.center = m_player_pos;
 }
 
 // -------------------------------------------------------------------------

@@ -19,6 +19,7 @@
 #include "Effects.h"
 #include "Keyboard.h"
 #include "CommonStates.h"
+#include "Collision.h"
 
 // クラスの前方宣言 =========================================================
 class DebugCamera;
@@ -33,6 +34,7 @@ class Player
 
 		// プレイヤーの速度
 		static const float PLAYER_VEL;
+		static const float RADIUS;
 
 	// メンバ変数の宣言
 
@@ -49,6 +51,9 @@ class Player
 
 		// プレイヤーvel
 		DirectX::SimpleMath::Vector3			m_player_vel;
+
+		// BOX
+		Box										m_player_box;
 
 	// メンバ関数の宣言
 	public:
@@ -68,5 +73,11 @@ class Player
 		DirectX::SimpleMath::Vector3 GetPlayerPos()
 		{
 			return m_player_pos;
+		}
+
+		// Boxのゲッター
+		Box GetBox()
+		{
+			return m_player_box;
 		}
 };

@@ -49,6 +49,4 @@ class Map
 		void Initialize(ID3D11Device1* device, ID3D11DeviceContext* context);
 		void Render(DebugCamera* camera, DirectX::SimpleMath::Matrix projection);
 		void Render(FollowCamera* camera, DirectX::SimpleMath::Matrix projection);
-
-//		bool IsPassable(float grid_x, float grid_z) const;
 };

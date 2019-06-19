@@ -52,7 +52,6 @@ Map::~Map()
 // -------------------------------------------------------------------------
 void Map::Initialize(ID3D11Device1* device, ID3D11DeviceContext* context)
 {
-	m_texture.resize(2);
 	// テクスチャのロード
 
 	// モデルの作成
@@ -60,6 +59,7 @@ void Map::Initialize(ID3D11Device1* device, ID3D11DeviceContext* context)
 
 	m_tiledmap->LoadMapData("mapchip.csv");
 
+	m_texture.resize(2);
 	DirectX::CreateWICTextureFromFile(device, L"Resources/Textures/concrete.png", nullptr, m_texture[0].GetAddressOf());
 	DirectX::CreateWICTextureFromFile(device, L"Resources/Textures/substance.png", nullptr, m_texture[1].GetAddressOf());
 }
@@ -133,17 +133,3 @@ void Map::Render(FollowCamera* camera, DirectX::SimpleMath::Matrix projection)
 		}
 	}
 }
-
-// -------------------------------------------------------------------------
-// overview		マップの描画処理
-//
-// argument		grid_x ポジションX
-// argument		grid_y ポジションY
-//
-// return		通れるならtrueを返す
-// -------------------------------------------------------------------------
-//bool Map::IsPassable(float grid_x, float grid_z) const
-//{
-//
-//	return false;
-//}
