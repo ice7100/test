@@ -80,21 +80,39 @@ void Player::Update()
 	DirectX::Keyboard::State keystate = DirectX::Keyboard::Get().GetState();
 	m_key_tracker.Update(keystate);
 
+	float speed = 1.0f;
+
+	if ((keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_UP))) != 0 || (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_DOWN))) != 0)
+	{
+		if ((keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_RIGHT))) != 0 || (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_LEFT))) != 0)
+		{
+			speed = 0.71f;
+		}
+		else
+		{
+			speed = 1.0f;
+		}
+	}
+	else if ((keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_RIGHT))) != 0 || (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_LEFT))) != 0)
+	{
+		speed = 1.0f;
+	}
+
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_LEFT)))
 	{
-		m_player_pos.x = m_player_pos.x - m_player_vel.x;
+		m_player_pos.x = m_player_pos.x - m_player_vel.x * speed;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_RIGHT)))
 	{
-		m_player_pos.x = m_player_pos.x + m_player_vel.x;
+		m_player_pos.x = m_player_pos.x + m_player_vel.x * speed;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_UP)))
 	{
-		m_player_pos.z = m_player_pos.z - m_player_vel.z;
+		m_player_pos.z = m_player_pos.z - m_player_vel.z * speed;
 	}
 	if (keystate.IsKeyDown(static_cast<DirectX::Keyboard::Keys>(VK_DOWN)))
 	{
-		m_player_pos.z = m_player_pos.z + m_player_vel.z;
+		m_player_pos.z = m_player_pos.z + m_player_vel.z * speed;
 	}
 
 	m_player_matrix = DirectX::SimpleMath::Matrix::CreateTranslation(m_player_pos);
